@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>🌾 Ферма (2.5D)</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://pixijs.download/release/pixi.min.js"></script>
+  <style>body{margin:0;overflow:hidden;background:#d8f7fa}</style>
+</head>
+<body>
+<div id="ui" style="position:fixed;top:10px;left:10px;z-index:1000">
+  <button onclick="plant()">🌱 Посадить</button>
+  <button onclick="harvest()">🌾 Собрать</button>
+  <button onclick="water()">💧 Полить</button>
+  <button onclick="animal()">🐔 Купить животное</button>
+  <button onclick="event()">🎯 Событие</button>
+  <button onclick="energy()">⚡ Энергия</button>
+  <button onclick="store()">🛒 Магазин</button>
+</div>
+<script>
+Telegram.WebApp.ready();
+const app = new PIXI.Application({ width: 700, height: 430, background: '#d8f7fa' });
+document.body.appendChild(app.view);
+const assets = {
+  grass:"https://i.imgur.com/7qUGiJI.png",
+  wheat:"https://i.imgur.com/CF0Gm9m.png",
+  chicken:"https://i.imgur.com/dp6G64Z.png"
+};
+function isoX(x, y) { return 120 + (x-y)*60; }
+function isoY(x, y) { return 170 + (x+y)*24; }
+function drawFarm() {
+  app.stage.removeChildren();
+  for(let y=0; y<4; y++) for(let x=0; x<6; x++){
+    let t = new PIXI.Sprite(PIXI.Texture.from(assets.grass));
+    t.x=isoX(x,y);
+    t.y=isoY(x,y); t.zIndex=x+y;
+    app.stage.addChild(t);
+  }
+  let crop = new PIXI.Sprite(PIXI.Texture.from(assets.wheat));
+  crop.x=isoX(2,2)+12; crop.y=isoY(2,2)-25; crop.scale.set(0.5);
+  app.stage.addChild(crop);
+
+  let anim = new PIXI.Sprite(PIXI.Texture.from(assets.chicken));
+  anim.x=isoX(3,1)+20; anim.y=isoY(3,1)-40; anim.scale.set(0.5);
+  app.stage.addChild(anim);
+
+  app.stage.sortableChildren = true;
+}
+// Кнопки
+function plant()    { send('plant'); }
+function harvest()  { send('harvest'); }
+function water()    { send('water'); }
+function animal()   { send('buy_animal'); }
+function event()    { send('event'); }
+function energy()   { send('use_energy'); }
+function store()    { Telegram.WebApp.showAlert("Магазин — все покупки через WebApp и команды!"); }
+function send(act)  { Telegram.WebApp.sendData(JSON.stringify({action: act})); }
+drawFarm();
+// Реакция на sync
+Telegram.WebApp.onEvent('web_app_data', e => {
+  // Можно обновлять всю ферму по такому событию!
+});
+</script>
+</body>
+</html>
